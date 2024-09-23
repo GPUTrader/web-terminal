@@ -3,7 +3,6 @@
 ## What is this?
 This is a lightweight (~43MB) alpine based docker image that comes pre-packaged with 2 wonderful tools:
 * [ttyd](https://github.com/tsl0922/ttyd): is a simple command-line tool for sharing a terminal over the web, using WebSockets.
-* [ngrok](https://ngrok.com/): Creates reverse tunnels that allow access to your box from the internet.
 
 On top of those, I've added socat, Nginx, OpenSSH, and OpenSSL. 
 This allows you to quickly provision an isolated (docker container) that can serve as a base for a lot of tunneling solutions. Use your imagination. :wink:
@@ -25,45 +24,6 @@ Then access http://localhost:7681 to have a web-based shell. There is no enforce
 
 See [here](https://github.com/tsl0922/ttyd#command-line-options) and [here](https://github.com/tsl0922/ttyd/wiki/Client-Options) for more help and the **CMD** line of this image's [Dockerfile](https://github.com/raonigabriel/web-terminal/blob/master/amd64/Dockerfile#L26).
 
----
-# Advanced Usage
-Things start shining when you pair ttyd with ngrok. On one active shell, start nrgrok:
-
-```sh
-ngrok http -region=sa -bind-tls=true -inspect=false localhost:7681
-```
-Check its running:
-```
-ngrok by @inconshreveable
-Session Status                online
-Session Expires               7 hours, 59 minutes
-Version                       2.3.35
-Region                        South America (sa)
-Forwarding                    https://e0075a2a0966.ngrok.io -> http://localhost:7681
-```
-
-See the **Forwarding** line? You now have your docker-container, web-based ttyd shell exposed (over HTTPS) by ngrok to the Internet.
-
-Notice that on this example weŕe using a custom region (sa) and that weŕe only exposing HTTPS tunnel (no HTTP) and that we have disabled the ngrok admin console (usually it listens on port 4040).
-
-Now, let's try that with nginx. First, run the embedded nginx in the background (notice the ampersand) then start ngrok:
-```sh
-# nginx &
-# ngrok http 80
-
-ngrok by @inconshreveable
-Session Status                online
-Session Expires               7 hours, 59 minutes
-Version                       2.3.35
-Region                        United States (us)
-Web Interface                 http://127.0.0.1:4040
-Forwarding                    http://cf96bd9d722e.ngrok.io -> http://localhost:80
-Forwarding                    https://cf96bd9d722e.ngrok.io -> http://localhost:80 
-```
-And now you have your nginx exposed to the internet over HTTP and HTPS (there are 2 **Forwarding** mappings).
-On this example, the web interface is also enabled on port 4040.
-
-Keep in mind that you can also use any other TCP based service server because ngrok supports not only HTTP/HTTPS but also raw TCP tunnels.
 
 ---
 ## Extras
@@ -123,10 +83,7 @@ Build, then run it:
 # docker build . -t js-box
 # docker run --rm --hostname jsbox -d -p 7681:7681 js-box
 ```
-Because we configured the **~/.ngrok2/ngrok.yml** on this custom image, you can start the ngrok tunnel by name inside the container as follows:
- ```sh
-# ngrok start nodejs
-```
+
 
 And since this image has the docker-cli, you could even bind-mount the host docker socket to use it from inside the container: 
  ```sh
@@ -134,23 +91,8 @@ And since this image has the docker-cli, you could even bind-mount the host dock
 ```
 We could also use have used socat, openssh tunnels or event ngrok to forward the local docker port (2375) to another host.
 
----
-## ngrok account and plans
-ngrok suports TLS, TCP tunnels, certs, built-in fileserver, forwarding to other machines so please take a look on https://ngrok.com/docs for more help.
-
-Keep in mind that some of the advanced features require you to create a (free) account then use the provided auth token. See https://ngrok.com/docs#getting-started-authtoken for more info.
-
-ngrok is free but also has paid plans that allow custom domains, reserved tunnels and greater control. See https://ngrok.com/pricing for plans.
 
 ---
 ## Licenses
 
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
----
-## Disclaimer
-* I am not affiliated in any way with ngrok.
-* This image comes with no warranty. Use it at your own risk.
-* I don't like Apple. Fuck off, fan-boys.
-* I don't like left-winged snowflakes. Fuck off, code-covenant. 
-* I will call my branches the old way. Long live **master**, fuck-off renaming.
